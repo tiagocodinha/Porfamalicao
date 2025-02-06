@@ -7,17 +7,13 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide"></script>
     <link rel="stylesheet" href="style/style.css">
-
-    
     <style>
-
         @font-face {
-                    font-family: 'iBrand';
-                    src: url('fonts/iBrand.otf') format('opentype');
-                    font-weight: normal;
-                    font-style: normal;
+            font-family: 'iBrand';
+            src: url('fonts/iBrand.otf') format('opentype');
+            font-weight: normal;
+            font-style: normal;
         }
-
         body {
             background: linear-gradient(7deg, #003299, #001e5c);
             display: flex;
@@ -28,31 +24,38 @@
             color: white;
             font-family: Arial, sans-serif;
             text-align: center;
+            overflow: hidden;
         }
-        .logo {
-            width: 350px;
-            height: 350px;
-            margin-bottom: 20px;
+        .container {
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            margin: 0 auto;
+            width: 100%;
+            height: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .logo {
+            width: 100%;
+            max-width: 350px;
+            height: auto;
+            margin-bottom: 20px;
         }
         .headline {
             font-size: 1.5em;
             margin-top: 20px;
             font-family: 'iBrand', Arial, sans-serif;
         }
-
     </style>
 </head>
 
 <body>
-    <div>
+    <div class="container">
         <div class="logo">
             <img src="image/Logo1.svg" alt="Logo Por Famalicão">
         </div>
         <h1 class="headline">🔧 A construir o futuro de Famalicão… e esta página! ⏳ </h1>
-    </div>        
+    </div>   
 </body>
 </html>
