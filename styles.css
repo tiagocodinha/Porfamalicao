@@ -1814,3 +1814,19 @@ p {
     order: 2;         /* maior que o default (0) dos <p> */
   }
 }
+
+
+@media (max-width:700px){
+  /* Só para quem tem nome/complemento maiores */
+  .team-member.taller{
+    height: auto;          /* adapta-se ao texto */
+    min-height: 240px;     /* mantém proporção com os outros */
+    padding-bottom: 20px;  /* só um pouco mais de respiro */
+  }
+  .team-member.taller h3,
+  .team-member.taller .position{
+    line-height: 1.2;
+    text-align: center;
+    word-break: break-word;
+  }
+}
