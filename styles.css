@@ -1768,7 +1768,7 @@ p {
 }
 
 .assinatura img {
-  max-width: 60%;   /* nunca passa dos 80% da largura do ecrã */
+  max-width: 30%;   /* nunca passa dos 80% da largura do ecrã */
   height: auto;
 }
 }
@@ -1794,15 +1794,22 @@ p {
 
 
 @media (max-width:768px){
+  .intro-com-foto{
+    display:flex;
+    justify-content:center; /* centra a imagem */
+    order: 2;               /* mantém depois dos parágrafos, se usares isto */
+  }
   .foto-candidato{
-    float:none; 
-    width:100%; 
-    height:auto; 
-    shape-outside:none; 
-    margin:0 0 16px 0; 
+    float:none;
+    width:70%;        /* ↓ menor que 100% */
+    height:auto;
+    shape-outside:none;
+    display:block;
+    margin:0 auto 16px; /* centra */
     border-radius:12px;
   }
 }
+
 
 /* Em mobile, coloca a imagem depois dos parágrafos */
 @media (max-width:768px){
