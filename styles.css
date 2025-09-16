@@ -1779,16 +1779,19 @@ p {
 }
 
 .foto-candidato{
-  float: right;                 
-  width: 280px;     /* antes: 360px */
-  height: 340px;    /* antes: 420px */
-  margin: 0 0 12px 24px;   /* ajustei o espaço à esquerda também */
-  shape-outside: url("/image/pedroimagem.png"); 
+  float: right;
+  width: 280px;
+  height: 340px;
+  margin: 0 0 12px 24px;
+  shape-outside: url("/image/pedroimagem.png");
   -webkit-shape-outside: url("/image/pedroimagem.png");
-  shape-margin: 12px;
-  object-fit: cover;            
-  border-radius: 0;             
+  shape-image-threshold: 0.2;        /* novo: contorno mais “largo” */
+  -webkit-shape-image-threshold: 0.2;
+  shape-margin: 22px;                /* novo: espaço extra entre texto e forma */
+  object-fit: cover;
+  display:block;                     /* ajuda no layout do float */
 }
+
 
 @media (max-width:768px){
   .foto-candidato{
