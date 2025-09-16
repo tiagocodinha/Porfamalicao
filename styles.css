@@ -1801,7 +1801,7 @@ p {
   }
   .foto-candidato{
     float:none;
-    width:70%;        /* ↓ menor que 100% */
+    width:85%;        /* ↓ menor que 100% */
     height:auto;
     shape-outside:none;
     display:block;
