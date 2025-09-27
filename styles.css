@@ -1840,3 +1840,28 @@ p {
     word-break: break-word;
   }
 }
+
+
+/* Transparência — cards em grelha */
+.transparency-section > .container > .container{
+  display: grid !important;
+  grid-template-columns: repeat(5, 1fr); /* 5 colunas fixas */
+  gap: 32px !important;
+  justify-content: center;
+  align-items: start;
+}
+
+/* garante largura consistente dos cards */
+.transparency-section .transparency-card{
+  width: 100% !important;
+  max-width: 220px; /* mantém limite do design */
+  margin: 0 auto;   /* centra cada card dentro da coluna */
+}
+
+/* Em mobile: volta a ser uma coluna vertical */
+@media (max-width: 768px){
+  .transparency-section > .container > .container{
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+}
