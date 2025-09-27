@@ -1842,26 +1842,49 @@ p {
 }
 
 
-/* Transparência — cards em grelha */
+/* Transparência — grelha responsiva estável (sem scroll) */
 .transparency-section > .container > .container{
-  display: grid !important;
-  grid-template-columns: repeat(5, 1fr); /* 5 colunas fixas */
-  gap: 32px !important;
-  justify-content: center;
+  display: grid !important;       /* sobrepõe o flex inline */
+  gap: 24px !important;
   align-items: start;
+  justify-items: center;          /* centra cada card na coluna */
+  grid-template-columns: repeat(5, 1fr);  /* desktop largo: 5 colunas */
 }
 
-/* garante largura consistente dos cards */
+/* largura dos cards consistente */
 .transparency-section .transparency-card{
-  width: 100% !important;
-  max-width: 220px; /* mantém limite do design */
-  margin: 0 auto;   /* centra cada card dentro da coluna */
+  width: 100%;
+  max-width: 240px;               /* ajusta se quiseres 220/260 */
 }
 
-/* Em mobile: volta a ser uma coluna vertical */
-@media (max-width: 768px){
+/* ===== Breakpoints para não “partir” em tablet ===== */
+
+/* ≥1200px: 5 colunas (já definido acima) */
+
+/* 992–1199px: 4 colunas */
+@media (max-width: 1199px){
+  .transparency-section > .container > .container{
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* 768–991px (tablet): 3 colunas */
+@media (max-width: 991px){
+  .transparency-section > .container > .container{
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* 576–767px (phablet): 2 colunas */
+@media (max-width: 767px){
+  .transparency-section > .container > .container{
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* <576px (mobile): 1 coluna em vertical */
+@media (max-width: 575px){
   .transparency-section > .container > .container{
     grid-template-columns: 1fr;
-    justify-items: center;
   }
 }
