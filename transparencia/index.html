@@ -146,10 +146,13 @@
       </div>
     </div>
 
-    
-
-    
-
+    <div class="transparency-card" style="display:flex;flex-direction:column;align-items:center;max-width:220px;background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:16px;">
+      <h3 style="margin-bottom:10px;text-align:center;">Debate Rádio Nazaré</h3>
+      <img src="/image/debateradionazare.png" alt="Debate Rádio Nazaré" style="width:100%;max-width:220px;border-radius:8px;">
+      <div style="width:100%;display:flex;justify-content:center;">
+        <a href="javascript:void(0)" class="consultar-btn audio-open" data-audio="episodio-1" style="text-align:center;">Ouvir</a>
+      </div>
+    </div>
 </div>
 
         <style>
@@ -246,6 +249,31 @@
     <div id="flip-container" class="flip-wrapper" style="width:100%; height:100%; background:#fff;"></div>
   </div>
 </div>
+
+<!-- Audio -->
+<div id="audio-modal" class="audio-modal" aria-hidden="true" role="dialog" aria-modal="true" style="display:none;">
+  <div class="audio-overlay" data-close></div>
+
+  <div class="audio-dialog" role="document">
+    <button class="audio-close" data-close aria-label="Fechar">✕</button>
+
+    <div class="audio-hero">
+      <img id="audioPoster" class="audio-poster" alt="">
+      <div class="audio-meta">
+        <h4 id="audioTitle" class="audio-title">Debate Rádio Nazaré</h4>
+        <div class="audio-actions">
+          <button id="audioShare" class="btn btn-outline" type="button">Partilhar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="audio-player">
+      <audio id="audioPlayer" controls preload="metadata"></audio>
+    </div>
+  </div>
+</div>
+
+
 
 <!-- StPageFlip (CDN) -->
 <link rel="stylesheet" href="https://unpkg.com/stpageflip@2.0.7/dist/css/style.css">
@@ -428,6 +456,95 @@
     if (modal.style.display === 'block') show(first);
   });
 })();
+
+
+/* —— Biblioteca de faixas (troca pelos teus ficheiros) —— */
+const AUDIO_LIBRARY = {
+  "episodio-1": {
+    src: "/image/audiodebate.mp3",
+    title: "Debate Rádio Nazaré",
+    thumb: "/image/debateradionazare.png",
+  },
+};
+
+(function(){
+  const modal   = document.getElementById('audio-modal');
+  const overlay = modal.querySelector('.audio-overlay');
+  const closeBt = modal.querySelector('.audio-close');
+  const audio   = document.getElementById('audioPlayer');
+  const poster  = document.getElementById('audioPoster');
+  const titleEl = document.getElementById('audioTitle');
+  const shareBt = document.getElementById('audioShare');
+
+  function shareUrl(slug){
+    const u = new URL(window.location.href);
+    u.searchParams.set('audio', slug);
+    return u.toString();
+  }
+
+  function openAudio(slug, autoplay=true){
+    const item = AUDIO_LIBRARY[slug];
+    if(!item){ console.warn('Áudio não encontrado:', slug); return; }
+
+    poster.src = item.thumb || '';
+    poster.alt = item.title || '';
+    titleEl.textContent = item.title || 'Áudio';
+    audio.src = item.src;
+
+    history.pushState({audio:slug}, '', shareUrl(slug));
+    modal.setAttribute('aria-hidden','false');
+    modal.style.display = 'flex';
+
+    if (autoplay){
+      audio.play().catch(()=>{});
+    }
+  }
+
+  function closeAudio(){
+    audio.pause();
+    modal.setAttribute('aria-hidden','true');
+    modal.style.display = 'none';
+    const u = new URL(window.location.href);
+    u.searchParams.delete('audio');
+    history.pushState({}, '', u.toString());
+  }
+
+  document.addEventListener('click', (e)=>{
+    const btn = e.target.closest('.audio-open');
+    if(!btn) return;
+    e.preventDefault();
+    openAudio(btn.getAttribute('data-audio'), true);
+  });
+
+  overlay.addEventListener('click', closeAudio);
+  closeBt.addEventListener('click', closeAudio);
+  document.addEventListener('keydown', (e)=>{
+    if(e.key === 'Escape' && modal.getAttribute('aria-hidden') === 'false') closeAudio();
+  });
+
+  shareBt.addEventListener('click', async ()=>{
+    const slug = new URL(window.location.href).searchParams.get('audio');
+    if(!slug) return;
+    const url = shareUrl(slug);
+    const data = { title: document.title, text: titleEl.textContent, url };
+    if (navigator.share){
+      try { await navigator.share(data); } catch(e){}
+    } else {
+      try {
+        await navigator.clipboard.writeText(url);
+        shareBt.textContent = 'Link copiado!';
+        setTimeout(()=> shareBt.textContent = 'Partilhar', 1400);
+      } catch { alert('Copia este link:\n' + url); }
+    }
+  });
+
+  (function(){
+    const q = new URLSearchParams(window.location.search);
+    const slug = q.get('audio');
+    if (slug && AUDIO_LIBRARY[slug]) openAudio(slug, false);
+  })();
+})();
+
 </script>
 
 <script src="/script.js"></script>
