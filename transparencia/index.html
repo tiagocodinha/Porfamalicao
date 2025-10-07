@@ -572,6 +572,101 @@ const AUDIO_LIBRARY = {
 })();
 
 
+
+/* ===== GA4: métricas de áudio =====
+   Requer o gtag já carregado no <head>.
+   Eventos enviados:
+   - audio_open        (quando o modal abre)
+   - audio_play        (quando começa a tocar)
+   - audio_pause       (quando pausa)
+   - audio_progress    (aos 10/25/50/75/95%)
+   - audio_complete    (quando termina)
+   - audio_listen      (envia listen_seconds em lotes/ao sair)
+*/
+(function(){
+  if (typeof gtag !== 'function') return;
+
+  const audio   = document.getElementById('audioPlayer');
+  const titleEl = document.getElementById('audioTitle');
+
+  // Guardar referência ao openAudio original e apanhar o slug
+  const originalOpenAudio = window.__openAudio;
+  let slug = null;
+
+  function gaEvent(name, extra={}, useBeacon=false){
+    const params = Object.assign({
+      audio_id: slug || '',
+      audio_title: titleEl?.textContent || '',
+      audio_duration: Math.round(audio?.duration || 0),
+      audio_position: Math.round(audio?.currentTime || 0)
+    }, extra);
+    if (useBeacon) params.transport_type = 'beacon';
+    try { gtag('event', name, params); } catch {}
+  }
+
+  // Contador de tempo efetivo a tocar (segundos)
+  let tick = null, lastTs = 0, listened = 0;
+  function startTick(){
+    if (tick || !audio) return;
+    lastTs = Date.now();
+    tick = setInterval(()=>{
+      if (!audio.paused && !audio.ended) {
+        const now = Date.now();
+        listened += (now - lastTs)/1000;
+        lastTs = now;
+      } else {
+        lastTs = Date.now();
+      }
+    }, 1000);
+  }
+  function stopTick(flush=true){
+    if (tick){ clearInterval(tick); tick = null; }
+    if (flush && listened > 0){
+      gaEvent('audio_listen', { listen_seconds: Math.round(listened) });
+      listened = 0;
+    }
+  }
+
+  // Milestones de progresso (%)
+  const fired = new Set();
+  function maybeFireMilestones(){
+    if (!audio || !audio.duration) return;
+    const pct = (audio.currentTime / audio.duration) * 100;
+    [10,25,50,75,95].forEach(m=>{
+      if (pct >= m && !fired.has(m)){
+        fired.add(m);
+        gaEvent('audio_progress', { audio_percent: m });
+      }
+    });
+  }
+
+  // Reempacotar openAudio para sabermos o slug e disparar "open"
+  window.__openAudio = function(newSlug, autoplay){
+    slug = newSlug || null;
+    fired.clear?.();
+    gaEvent('audio_open');
+    return originalOpenAudio(newSlug, autoplay);
+  };
+
+  // Listeners do player
+  audio.addEventListener('play',  ()=>{ gaEvent('audio_play'); startTick(); });
+  audio.addEventListener('pause', ()=>{ gaEvent('audio_pause'); stopTick(true); });
+  audio.addEventListener('ended', ()=>{ stopTick(true); gaEvent('audio_complete'); });
+  audio.addEventListener('timeupdate', maybeFireMilestones);
+
+  // Ao sair/ocultar separador, enviar o que estiver pendente via Beacon
+  document.addEventListener('visibilitychange', ()=>{
+    if (document.visibilityState === 'hidden'){
+      stopTick(false);
+      if (listened > 0){
+        gaEvent('audio_listen', { listen_seconds: Math.round(listened) }, true);
+        listened = 0;
+      }
+    }
+  });
+})();
+
+
 </script>
 
 <script src="/script.js"></script>
