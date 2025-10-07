@@ -458,7 +458,8 @@
 })();
 
 
-/* —— Biblioteca de faixas (troca pelos teus ficheiros) —— */
+
+/* ===== Biblioteca de faixas ===== */
 const AUDIO_LIBRARY = {
   "debate-radio-nazare": {
     src: "/image/audiodebate.mp3",
@@ -467,7 +468,7 @@ const AUDIO_LIBRARY = {
   },
 };
 
-(function(){
+(function () {
   const modal   = document.getElementById('audio-modal');
   const overlay = modal.querySelector('.audio-overlay');
   const closeBt = modal.querySelector('.audio-close');
@@ -482,31 +483,41 @@ const AUDIO_LIBRARY = {
     return u.toString();
   }
 
-function openAudio(slug, autoplay = true) {
-  const item = AUDIO_LIBRARY[slug];
-  if (!item) { console.warn('Áudio não encontrado:', slug); return; }
+  function openAudio(slug, autoplay = true) {
+    const item = AUDIO_LIBRARY[slug];
+    if (!item) { console.warn('Áudio não encontrado:', slug); return; }
 
-  poster.src = item.thumb || '';
-  poster.alt = item.title || '';
-  titleEl.textContent = item.title || 'Áudio';
-  audio.src = item.src;
+    // preencher UI
+    poster.src = item.thumb || '';
+    poster.alt = item.title || '';
+    titleEl.textContent = item.title || 'Áudio';
+    audio.src = item.src;
 
-  history.pushState({ audio: slug }, '', shareUrl(slug));
-  modal.setAttribute('aria-hidden', 'false');
-  modal.style.display = 'flex';
+    // mostrar modal
+    history.pushState({ audio: slug }, '', shareUrl(slug));
+    modal.setAttribute('aria-hidden', 'false');
+    modal.style.display = 'flex';
 
-  // Tenta autoplay
-  if (autoplay) {
-    const playPromise = audio.play();
-    if (playPromise !== undefined) {
-      playPromise.catch(() => {
-        // Mostra botão play se for bloqueado
-        console.log("Autoplay bloqueado — o utilizador precisa tocar em Play.");
-      });
+    // tentar autoplay com fallbacks
+    audio.autoplay = true;   // ajuda em alguns browsers
+    audio.load();
+
+    if (autoplay) {
+      const tryPlay = () => audio.play().catch(() => { /* bloqueado pelo browser */ });
+
+      tryPlay();
+
+      // fallback: tocar no primeiro gesto do utilizador
+      const resumeOnUserGesture = () => {
+        tryPlay();
+        window.removeEventListener('pointerdown', resumeOnUserGesture, optsOnce);
+        window.removeEventListener('keydown',     resumeOnUserGesture, optsOnce);
+      };
+      const optsOnce = { once: true, passive: true };
+      window.addEventListener('pointerdown', resumeOnUserGesture, optsOnce);
+      window.addEventListener('keydown',     resumeOnUserGesture, optsOnce);
     }
   }
-}
-
 
   function closeAudio(){
     audio.pause();
@@ -517,6 +528,7 @@ function openAudio(slug, autoplay = true) {
     history.pushState({}, '', u.toString());
   }
 
+  // abrir via clique nos botões .audio-open
   document.addEventListener('click', (e)=>{
     const btn = e.target.closest('.audio-open');
     if(!btn) return;
@@ -524,16 +536,18 @@ function openAudio(slug, autoplay = true) {
     openAudio(btn.getAttribute('data-audio'), true);
   });
 
+  // fecho e teclas
   overlay.addEventListener('click', closeAudio);
   closeBt.addEventListener('click', closeAudio);
   document.addEventListener('keydown', (e)=>{
     if(e.key === 'Escape' && modal.getAttribute('aria-hidden') === 'false') closeAudio();
   });
 
+  // partilhar (link com query ?audio=slug)
   shareBt.addEventListener('click', async ()=>{
     const slug = new URL(window.location.href).searchParams.get('audio');
     if(!slug) return;
-    const url = shareUrl(slug);
+    const url  = shareUrl(slug);
     const data = { title: document.title, text: titleEl.textContent, url };
     if (navigator.share){
       try { await navigator.share(data); } catch(e){}
@@ -546,21 +560,17 @@ function openAudio(slug, autoplay = true) {
     }
   });
 
+  // abrir automaticamente a partir do parâmetro ?audio=...
   (function(){
     const q = new URLSearchParams(window.location.search);
     const slug = q.get('audio');
-    if (slug && AUDIO_LIBRARY[slug]) openAudio(slug, false);
+    if (slug && AUDIO_LIBRARY[slug]) openAudio(slug, true); // <-- autoplay ON
   })();
+
+  // (opcional) expor para debug na consola
+  window.__openAudio = openAudio;
 })();
 
-(function(){
-  const q = new URLSearchParams(window.location.search);
-  const slug = q.get('audio');
-  if (slug && AUDIO_LIBRARY[slug]) {
-    // tenta abrir e tocar
-    openAudio(slug, true);
-  }
-})();
 
 </script>
 
